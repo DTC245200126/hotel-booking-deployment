@@ -1,0 +1,97 @@
+@model HotelBooking.Web.Models.Customer
+
+@{
+    ViewData["Title"] = "Thêm khách hàng";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4">
+
+                <div class="card-header bg-primary text-white p-4 rounded-top-4">
+                    <h3 class="fw-bold mb-1">Thêm khách hàng mới</h3>
+                    <p class="mb-0">Nhập thông tin khách hàng của khách sạn</p>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form asp-controller="Customers"
+                          asp-action="Create"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="All"
+                             class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="FullName"
+                                   class="form-label fw-semibold">
+                                Họ và tên
+                            </label>
+
+                            <input asp-for="FullName"
+                                   class="form-control"
+                                   placeholder="Nhập họ và tên khách hàng" />
+
+                            <span asp-validation-for="FullName"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber"
+                                   class="form-label fw-semibold">
+                                Số điện thoại
+                            </label>
+
+                            <input asp-for="PhoneNumber"
+                                   type="tel"
+                                   class="form-control"
+                                   placeholder="Ví dụ: 0912345678" />
+
+                            <span asp-validation-for="PhoneNumber"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Email"
+                                   class="form-label fw-semibold">
+                                Email (không bắt buộc)
+                            </label>
+
+                            <input asp-for="Email"
+                                   type="email"
+                                   class="form-control"
+                                   placeholder="Ví dụ: khachhang@gmail.com" />
+
+                            <span asp-validation-for="Email"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <a asp-controller="Customers"
+                               asp-action="Index"
+                               class="btn btn-outline-secondary px-4">
+                                Quay lại
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                Lưu khách hàng
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

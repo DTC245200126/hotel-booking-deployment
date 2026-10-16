@@ -1,0 +1,26 @@
+# Build ứng dụng ASP.NET Core MVC .NET 9
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+WORKDIR /src
+
+COPY HotelBooking.Web.csproj ./
+RUN dotnet restore
+
+COPY . ./
+RUN dotnet publish -c Release -o /app/publish --no-restore
+
+# Chạy ứng dụng
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+
+WORKDIR /app
+
+COPY --from=build /app/publish ./
+
+# Chạy container không dùng quyền root
+USER $APP_UID
+
+ENV ASPNETCORE_HTTP_PORTS=8080
+
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "HotelBooking.Web.dll"]

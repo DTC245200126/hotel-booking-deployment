@@ -1,0 +1,105 @@
+@model HotelBooking.Web.Models.Room
+
+@{
+    ViewData["Title"] = "Thêm phòng mới";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-primary text-white p-4 rounded-top-4">
+                    <h3 class="mb-1 fw-bold">Thêm phòng khách sạn</h3>
+                    <p class="mb-0">Nhập thông tin phòng mới vào hệ thống</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form asp-controller="Rooms" asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="RoomNumber" class="form-label fw-semibold">
+                                Số phòng
+                            </label>
+                            <input asp-for="RoomNumber"
+                                   class="form-control"
+                                   placeholder="Ví dụ: 101" />
+                            <span asp-validation-for="RoomNumber"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RoomType" class="form-label fw-semibold">
+                                Loại phòng
+                            </label>
+                            <select asp-for="RoomType" class="form-select">
+                                <option value="">-- Chọn loại phòng --</option>
+                                <option value="Standard">Standard</option>
+                                <option value="Deluxe">Deluxe</option>
+                                <option value="VIP">VIP</option>
+                                <option value="Family">Family</option>
+                            </select>
+                            <span asp-validation-for="RoomType"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Price" class="form-label fw-semibold">
+                                Giá phòng (VNĐ)
+                            </label>
+                            <input asp-for="Price"
+                                   type="number"
+                                   min="1"
+                                   max="100000000"
+                                   step="1000"
+                                   class="form-control"
+                                   placeholder="Ví dụ: 500000" />
+                            <span asp-validation-for="Price"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label fw-semibold">
+                                Trạng thái phòng
+                            </label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="Available">Phòng trống</option>
+                                <option value="Occupied">Đang sử dụng</option>
+                                <option value="Maintenance">Bảo trì</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-semibold">
+                                Mô tả phòng
+                            </label>
+                            <textarea asp-for="Description"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="Nhập mô tả phòng..."></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-controller="Rooms"
+                               asp-action="Index"
+                               class="btn btn-outline-secondary px-4">
+                                Quay lại
+                            </a>
+
+                            <button type="submit" class="btn btn-primary px-4">
+                                Lưu phòng
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

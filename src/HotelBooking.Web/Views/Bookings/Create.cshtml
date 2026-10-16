@@ -1,0 +1,194 @@
+@model HotelBooking.Web.Models.Booking
+
+@{
+    ViewData["Title"] = "Đặt phòng mới";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+                <div class="card-header bg-primary text-white p-4">
+                    <h3 class="fw-bold mb-1">Đặt phòng khách sạn</h3>
+                    <p class="mb-0">
+                        Nhập thông tin khách hàng và lựa chọn phòng
+                    </p>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form asp-controller="Bookings"
+                          asp-action="Create"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="All"
+                             class="text-danger mb-3"></div>
+
+                        <!-- THÔNG TIN KHÁCH HÀNG -->
+                        <h5 class="text-primary fw-bold mb-3">
+                            1. Thông tin khách hàng
+                        </h5>
+
+                        <!-- HỌ VÀ TÊN -->
+                        <div class="mb-3">
+                            <label for="FullName"
+                                   class="form-label fw-semibold">
+                                Họ và tên *
+                            </label>
+
+                            <input type="text"
+                                   id="FullName"
+                                   name="FullName"
+                                   value="@ViewBag.FullName"
+                                   class="form-control"
+                                   placeholder="Nhập họ và tên khách hàng"
+                                   maxlength="100"
+                                   required />
+                        </div>
+
+                        <!-- SỐ ĐIỆN THOẠI -->
+                        <div class="mb-3">
+                            <label for="PhoneNumber"
+                                   class="form-label fw-semibold">
+                                Số điện thoại *
+                            </label>
+
+                            <input type="tel"
+                                   id="PhoneNumber"
+                                   name="PhoneNumber"
+                                   value="@ViewBag.PhoneNumber"
+                                   class="form-control"
+                                   placeholder="Ví dụ: 0912345678"
+                                   pattern="0[35789][0-9]{8}"
+                                   minlength="10"
+                                   maxlength="10"
+                                   inputmode="numeric"
+                                   title="Số điện thoại phải có đúng 10 chữ số, bắt đầu bằng 03, 05, 07, 08 hoặc 09"
+                                   required />
+
+                            <div class="form-text">
+                                Bắt buộc nhập đúng 10 chữ số.
+                                Đầu số hợp lệ: 03, 05, 07, 08, 09.
+                            </div>
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div class="mb-4">
+                            <label for="Email"
+                                   class="form-label fw-semibold">
+                                Email (không bắt buộc)
+                            </label>
+
+                            <input type="email"
+                                   id="Email"
+                                   name="Email"
+                                   value="@ViewBag.Email"
+                                   class="form-control"
+                                   placeholder="Ví dụ: khachhang@gmail.com" />
+                        </div>
+
+                        <hr />
+
+                        <!-- THÔNG TIN ĐẶT PHÒNG -->
+                        <h5 class="text-primary fw-bold mb-3">
+                            2. Thông tin đặt phòng
+                        </h5>
+
+                        <!-- CHỌN PHÒNG -->
+                        <div class="mb-3">
+                            <label asp-for="RoomId"
+                                   class="form-label fw-semibold">
+                                Chọn phòng khách sạn *
+                            </label>
+
+                            <select asp-for="RoomId"
+                                    asp-items="ViewBag.Rooms"
+                                    class="form-select"
+                                    required>
+                                <option value="">
+                                    -- Chọn phòng khách sạn --
+                                </option>
+                            </select>
+
+                            <span asp-validation-for="RoomId"
+                                  class="text-danger"></span>
+
+                            <div class="form-text">
+                                Danh sách hiển thị số phòng,
+                                loại phòng và giá tiền mỗi đêm.
+                            </div>
+                        </div>
+
+                        <!-- NGÀY NHẬN VÀ TRẢ PHÒNG -->
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CheckIn"
+                                       class="form-label fw-semibold">
+                                    Ngày nhận phòng *
+                                </label>
+
+                                <input asp-for="CheckIn"
+                                       asp-format="{0:yyyy-MM-dd}"
+                                       type="date"
+                                       class="form-control"
+                                       required />
+
+                                <span asp-validation-for="CheckIn"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CheckOut"
+                                       class="form-label fw-semibold">
+                                    Ngày trả phòng *
+                                </label>
+
+                                <input asp-for="CheckOut"
+                                       asp-format="{0:yyyy-MM-dd}"
+                                       type="date"
+                                       class="form-control"
+                                       required />
+
+                                <span asp-validation-for="CheckOut"
+                                      class="text-danger"></span>
+                            </div>
+
+                        </div>
+
+                        <!-- THÔNG BÁO TÍNH TIỀN -->
+                        <div class="alert alert-info">
+                            Tổng tiền sẽ được hệ thống tự động tính
+                            dựa trên giá phòng và số đêm lưu trú.
+                        </div>
+
+                        <!-- NÚT THAO TÁC -->
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <a asp-controller="Bookings"
+                               asp-action="Index"
+                               class="btn btn-outline-secondary px-4">
+                                Quay lại
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                Xác nhận đặt phòng
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
