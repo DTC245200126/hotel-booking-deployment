@@ -1,107 +1,101 @@
 @model IEnumerable<HotelBooking.Web.Models.Room>
 
 @{
-    ViewData["Title"] = "Quản lý phòng khách sạn";
+    ViewData["Title"] = "Quản lý phòng";
 }
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<section class="management-page">
+    <header class="page-heading">
         <div>
-            <h2 class="fw-bold text-primary mb-1">Quản lý phòng khách sạn</h2>
-            <p class="text-muted mb-0">Danh sách và trạng thái các phòng trong khách sạn</p>
+            <p class="page-eyebrow">DANH MỤC</p>
+            <h1>Quản lý phòng</h1>
+            <p class="page-description">Danh sách và trạng thái các phòng trong khách sạn.</p>
         </div>
-
-        <a asp-controller="Rooms" asp-action="Create"
-           class="btn btn-primary rounded-pill px-4">
-            + Thêm phòng
+        <a asp-controller="Rooms" asp-action="Create" class="btn btn-primary action-button">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            Thêm phòng
         </a>
-    </div>
+    </header>
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">@TempData["Success"]</div>
+        <div class="alert alert-success" role="status">@TempData["Success"]</div>
     }
 
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">@TempData["Error"]</div>
+        <div class="alert alert-danger" role="alert">@TempData["Error"]</div>
     }
 
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
+    <div class="data-card">
+        <div class="data-card-heading">
+            <div>
+                <h2>Danh sách phòng</h2>
+                <p>Thông tin loại phòng, giá và tình trạng hiện tại.</p>
+            </div>
+            <span class="record-count">@Model.Count() phòng</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table data-table room-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Số phòng</th>
+                        <th scope="col">Loại phòng</th>
+                        <th scope="col">Giá / đêm</th>
+                        <th scope="col">Trạng thái</th>
+                        <th scope="col">Mô tả</th>
+                        <th scope="col" class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var room in Model)
+                    {
                         <tr>
-                            <th>Số phòng</th>
-                            <th>Loại phòng</th>
-                            <th>Giá phòng</th>
-                            <th>Trạng thái</th>
-                            <th>Mô tả</th>
-                            <th class="text-center">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var room in Model)
-                        {
-                            <tr>
-                                <td class="fw-bold">@room.RoomNumber</td>
-                                <td>@room.RoomType</td>
-                                <td class="text-danger fw-semibold">
-                                    @room.Price.ToString("N0") VNĐ
-                                </td>
-                                <td>
-                                    @if (room.Status == "Available")
-                                    {
-                                        <span class="badge bg-success">Phòng trống</span>
-                                    }
-                                    else if (room.Status == "Occupied")
-                                    {
-                                        <span class="badge bg-danger">Đang sử dụng</span>
-                                    }
-                                    else if (room.Status == "Maintenance")
-                                    {
-                                        <span class="badge bg-warning text-dark">Bảo trì</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">@room.Status</span>
-                                    }
-                                </td>
-                                <td>@room.Description</td>
-                                <td class="text-center">
-                                    <a asp-action="Edit"
-                                       asp-route-id="@room.Id"
-                                       class="btn btn-sm btn-outline-primary">
-                                        Sửa
+                            <td class="cell-primary">@room.RoomNumber</td>
+                            <td>@room.RoomType</td>
+                            <td class="cell-price">@room.Price.ToString("N0") VNĐ</td>
+                            <td>
+                                @if (room.Status == "Available")
+                                {
+                                    <span class="status-badge status-available">Phòng trống</span>
+                                }
+                                else if (room.Status == "Occupied")
+                                {
+                                    <span class="status-badge status-occupied">Đang sử dụng</span>
+                                }
+                                else if (room.Status == "Maintenance")
+                                {
+                                    <span class="status-badge status-maintenance">Bảo trì</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-neutral">@room.Status</span>
+                                }
+                            </td>
+                            <td class="description-cell">@(string.IsNullOrWhiteSpace(room.Description) ? "—" : room.Description)</td>
+                            <td>
+                                <div class="row-actions">
+                                    <a asp-action="Edit" asp-route-id="@room.Id" class="icon-button edit-button" aria-label="Sửa phòng @room.RoomNumber" title="Sửa">
+                                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14 5 5 5M4 20l4.5-1 10.8-10.8a2.1 2.1 0 0 0-3-3L5.5 16 4 20Z" /></svg>
                                     </a>
-
-                                    <form asp-action="Delete"
-                                          asp-route-id="@room.Id"
-                                          method="post"
-                                          class="d-inline"
-                                          onsubmit="return confirm('Bạn có chắc muốn xóa phòng này?');">
+                                    <form asp-action="Delete" asp-route-id="@room.Id" method="post" class="inline-form" onsubmit="return confirm('Bạn có chắc muốn xóa phòng này?');">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit"
-                                                class="btn btn-sm btn-outline-danger">
-                                            Xóa
+                                        <button type="submit" class="icon-button delete-button" aria-label="Xóa phòng @room.RoomNumber" title="Xóa">
+                                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" /></svg>
                                         </button>
                                     </form>
-                                </td>
-                            </tr>
-                        }
-
-                        @if (!Model.Any())
-                        {
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-5">
-                                    Chưa có phòng nào. Hãy thêm phòng mới!
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="empty-state">Chưa có phòng nào. Hãy thêm phòng mới.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
-</div>
+</section>

@@ -4,116 +4,76 @@
     ViewData["Title"] = "Quản lý khách hàng";
 }
 
-<div class="container py-4">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<section class="management-page">
+    <header class="page-heading">
         <div>
-            <h2 class="fw-bold text-primary mb-1">
-                Quản lý khách hàng
-            </h2>
-            <p class="text-muted mb-0">
-                Danh sách thông tin khách hàng của khách sạn
-            </p>
+            <p class="page-eyebrow">DANH MỤC</p>
+            <h1>Quản lý khách hàng</h1>
+            <p class="page-description">Danh sách thông tin khách hàng của khách sạn.</p>
         </div>
-
-        <a asp-controller="Customers"
-           asp-action="Create"
-           class="btn btn-primary rounded-pill px-4">
-            + Thêm khách hàng
+        <a asp-controller="Customers" asp-action="Create" class="btn btn-primary action-button">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 4 18.5V20M10 10a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm9-2v6m3-3h-6" /></svg>
+            Thêm khách hàng
         </a>
-    </div>
+    </header>
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">
-            @TempData["Success"]
-        </div>
+        <div class="alert alert-success" role="status">@TempData["Success"]</div>
     }
-
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">
-            @TempData["Error"]
-        </div>
+        <div class="alert alert-danger" role="alert">@TempData["Error"]</div>
     }
 
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
+    <div class="data-card">
+        <div class="data-card-heading">
+            <div>
+                <h2>Danh sách khách hàng</h2>
+                <p>Thông tin liên hệ đã được lưu trong hệ thống.</p>
+            </div>
+            <span class="record-count">@Model.Count() khách hàng</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table data-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Họ và tên</th>
+                        <th scope="col">Số điện thoại</th>
+                        <th scope="col">Email</th>
+                        <th scope="col" class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var customer in Model)
+                    {
                         <tr>
-                            <th>STT</th>
-                            <th>Họ và tên</th>
-                            <th>Số điện thoại</th>
-                            <th>Email</th>
-                            <th class="text-center">Thao tác</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @{
-                            int stt = 1;
-                        }
-
-                        @foreach (var customer in Model)
-                        {
-                            <tr>
-                                <td>@stt</td>
-
-                                <td class="fw-semibold">
-                                    @customer.FullName
-                                </td>
-
-                                <td>@customer.PhoneNumber</td>
-
-                                <td>
-                                    @(string.IsNullOrEmpty(customer.Email)
-                                        ? "Chưa cập nhật"
-                                        : customer.Email)
-                                </td>
-
-                                <td class="text-center">
-                                    <a asp-controller="Customers"
-                                       asp-action="Edit"
-                                       asp-route-id="@customer.Id"
-                                       class="btn btn-sm btn-outline-primary">
-                                        Sửa
+                            <td class="cell-primary">@customer.FullName</td>
+                            <td class="cell-nowrap">@customer.PhoneNumber</td>
+                            <td>@(string.IsNullOrWhiteSpace(customer.Email) ? "Chưa cập nhật" : customer.Email)</td>
+                            <td>
+                                <div class="row-actions">
+                                    <a asp-controller="Customers" asp-action="Edit" asp-route-id="@customer.Id" class="icon-button edit-button" aria-label="Sửa khách hàng @customer.FullName" title="Sửa">
+                                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14 5 5 5M4 20l4.5-1 10.8-10.8a2.1 2.1 0 0 0-3-3L5.5 16 4 20Z" /></svg>
                                     </a>
-
-                                    <form asp-controller="Customers"
-                                          asp-action="Delete"
-                                          asp-route-id="@customer.Id"
-                                          method="post"
-                                          class="d-inline"
-                                          onsubmit="return confirm('Bạn có chắc muốn xóa khách hàng này?');">
-
+                                    <form asp-controller="Customers" asp-action="Delete" asp-route-id="@customer.Id" method="post" class="inline-form" onsubmit="return confirm('Bạn có chắc muốn xóa khách hàng này?');">
                                         @Html.AntiForgeryToken()
-
-                                        <button type="submit"
-                                                class="btn btn-sm btn-outline-danger">
-                                            Xóa
+                                        <button type="submit" class="icon-button delete-button" aria-label="Xóa khách hàng @customer.FullName" title="Xóa">
+                                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" /></svg>
                                         </button>
                                     </form>
-                                </td>
-                            </tr>
-
-                            stt++;
-                        }
-
-                        @if (!Model.Any())
-                        {
-                            <tr>
-                                <td colspan="5"
-                                    class="text-center text-muted py-5">
-                                    Chưa có khách hàng nào.
-                                    Hãy thêm khách hàng mới!
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="empty-state">Chưa có khách hàng nào. Hãy thêm khách hàng mới.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
-</div>
+</section>

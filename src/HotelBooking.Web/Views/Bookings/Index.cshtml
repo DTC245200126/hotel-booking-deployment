@@ -4,121 +4,83 @@
     ViewData["Title"] = "Quản lý đặt phòng";
 }
 
-<div class="container py-4">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<section class="management-page bookings-page">
+    <header class="page-heading">
         <div>
-            <h2 class="fw-bold text-primary mb-1">
-                Quản lý đặt phòng khách sạn
-            </h2>
-            <p class="text-muted mb-0">
-                Danh sách các lượt đặt phòng của khách hàng
-            </p>
+            <p class="page-eyebrow">DANH MỤC</p>
+            <h1>Quản lý đặt phòng</h1>
+            <p class="page-description">Theo dõi lịch nhận và trả phòng của khách hàng.</p>
         </div>
-
-        <a asp-controller="Bookings"
-           asp-action="Create"
-           class="btn btn-primary rounded-pill px-4">
-            + Đặt phòng mới
+        <a asp-controller="Bookings" asp-action="Create" class="btn btn-primary action-button">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2" /><path d="M8 3v4m8-4v4M4 10h16m-11 5h6" /></svg>
+            Đặt phòng mới
         </a>
-    </div>
+    </header>
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">
-            @TempData["Success"]
-        </div>
+        <div class="alert alert-success" role="status">@TempData["Success"]</div>
     }
-
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger">
-            @TempData["Error"]
-        </div>
+        <div class="alert alert-danger" role="alert">@TempData["Error"]</div>
     }
 
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body">
-            <div class="table-responsive">
-
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Mã đặt phòng</th>
-                            <th>Khách hàng</th>
-                            <th>Số phòng</th>
-                            <th>Ngày nhận</th>
-                            <th>Ngày trả</th>
-                            <th>Tổng tiền</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        @foreach (var booking in Model)
-                        {
-                            <tr>
-                                <td class="fw-bold">
-                                    #@booking.Id
-                                </td>
-
-                                <td>
-                                    @booking.Customer.FullName
-                                </td>
-
-                                <td>
-                                    @booking.Room.RoomNumber
-                                </td>
-
-                                <td>
-                                    @booking.CheckIn.ToString("dd/MM/yyyy")
-                                </td>
-
-                                <td>
-                                    @booking.CheckOut.ToString("dd/MM/yyyy")
-                                </td>
-
-                                <td class="text-danger fw-semibold">
-                                    @booking.TotalPrice.ToString("N0") VNĐ
-                                </td>
-
-                                <td>
-                                    @if (booking.Status == "Booked")
-                                    {
-                                        <span class="badge bg-primary">
-                                            Đã đặt
-                                        </span>
-                                    }
-                                    else if (booking.Status == "Cancelled")
-                                    {
-                                        <span class="badge bg-danger">
-                                            Đã hủy
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">
-                                            @booking.Status
-                                        </span>
-                                    }
-                                </td>
-                            </tr>
-                        }
-
-                        @if (!Model.Any())
-                        {
-                            <tr>
-                                <td colspan="7"
-                                    class="text-center text-muted py-5">
-                                    Chưa có lượt đặt phòng nào.
-                                    Hãy tạo đặt phòng mới!
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-
+    <div class="data-card">
+        <div class="data-card-heading">
+            <div>
+                <h2>Danh sách đặt phòng</h2>
+                <p>Các lượt đặt phòng đã được ghi nhận.</p>
             </div>
+            <span class="record-count">@Model.Count() lượt đặt</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table data-table booking-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Mã đặt phòng</th>
+                        <th scope="col">Khách hàng</th>
+                        <th scope="col">Số phòng</th>
+                        <th scope="col">Ngày nhận</th>
+                        <th scope="col">Ngày trả</th>
+                        <th scope="col">Tổng tiền</th>
+                        <th scope="col">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var booking in Model)
+                    {
+                        <tr>
+                            <td class="cell-primary cell-nowrap booking-id">#@booking.Id</td>
+                            <td class="booking-customer">@booking.Customer.FullName</td>
+                            <td class="cell-nowrap">@booking.Room.RoomNumber</td>
+                            <td class="cell-nowrap">@booking.CheckIn.ToString("dd/MM/yyyy")</td>
+                            <td class="cell-nowrap">@booking.CheckOut.ToString("dd/MM/yyyy")</td>
+                            <td class="cell-price cell-nowrap booking-total">@booking.TotalPrice.ToString("N0") VNĐ</td>
+                            <td>
+                                @if (booking.Status == "Booked")
+                                {
+                                    <span class="status-badge status-booked">Đã đặt</span>
+                                }
+                                else if (booking.Status == "Cancelled")
+                                {
+                                    <span class="status-badge status-cancelled">Đã hủy</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-neutral">@booking.Status</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="empty-state">Chưa có lượt đặt phòng nào. Hãy tạo đặt phòng mới.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
-</div>
+</section>

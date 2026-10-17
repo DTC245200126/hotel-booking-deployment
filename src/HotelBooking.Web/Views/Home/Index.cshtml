@@ -1,8 +1,170 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model HotelBooking.Web.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Tổng quan";
+    var roomTotalForChart = Math.Max(Model.TotalRooms, 1);
+    var availableAngle = Model.AvailableRooms * 360 / roomTotalForChart;
+    var occupiedAngle = (Model.AvailableRooms + Model.OccupiedRooms) * 360 / roomTotalForChart;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="overview-page" aria-labelledby="overview-title">
+    <header class="overview-hero">
+        <div class="overview-hero-copy">
+            <p class="overview-kicker">CHÀO MỪNG BẠN ĐẾN VỚI</p>
+            <h1 id="overview-title">HỆ THỐNG ĐẶT PHÒNG KHÁCH SẠN</h1>
+            <p>Quản lý phòng, khách hàng và các lượt đặt phòng thuận tiện, nhanh chóng.</p>
+            <span class="hero-rule" aria-hidden="true"></span>
+        </div>
+    </header>
+
+    <div class="overview-stats" aria-label="Các chỉ số tổng quan">
+        <article class="overview-stat">
+            <span class="overview-stat-icon overview-stat-icon-rooms" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 20V5.5M3.5 15.5h17V20M6.5 15.5V10h5a3 3 0 0 1 3 3v2.5M20.5 15.5V12a2 2 0 0 0-2-2h-4" /></svg>
+            </span>
+            <span class="overview-stat-label">Tổng số phòng</span>
+            <strong class="overview-stat-value">@Model.TotalRooms.ToString("N0")</strong>
+        </article>
+        <article class="overview-stat">
+            <span class="overview-stat-icon overview-stat-icon-available" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 20V8.5L12 4l8 4.5V20M8 20v-5h8v5M9 9h.01M15 9h.01" /></svg>
+            </span>
+            <span class="overview-stat-label">Phòng trống</span>
+            <strong class="overview-stat-value">@Model.AvailableRooms.ToString("N0")</strong>
+        </article>
+        <article class="overview-stat">
+            <span class="overview-stat-icon overview-stat-icon-customers" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.25" /><path d="M3.5 19v-1.25A4.75 4.75 0 0 1 8.25 13h1.5a4.75 4.75 0 0 1 4.75 4.75V19M15.5 5.25a3.25 3.25 0 0 1 0 6.25m2 1.5a4.75 4.75 0 0 1 3 4.5V19" /></svg>
+            </span>
+            <span class="overview-stat-label">Tổng khách hàng</span>
+            <strong class="overview-stat-value">@Model.TotalCustomers.ToString("N0")</strong>
+        </article>
+        <article class="overview-stat">
+            <span class="overview-stat-icon overview-stat-icon-bookings" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5.5" width="16" height="15" rx="2" /><path d="M8 3.5v4M16 3.5v4M4 10h16m-7 4 2 2 3-4" /></svg>
+            </span>
+            <span class="overview-stat-label">Lượt đặt phòng</span>
+            <strong class="overview-stat-value">@Model.TotalBookings.ToString("N0")</strong>
+        </article>
+    </div>
+
+    <section class="quick-access" aria-labelledby="quick-access-title">
+        <div class="dashboard-section-heading">
+            <h2 id="quick-access-title"><span aria-hidden="true">✦</span> Truy cập nhanh</h2>
+        </div>
+        <div class="quick-access-links">
+            <a asp-controller="Rooms" asp-action="Index" class="quick-card quick-card-rooms">
+                <span class="quick-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 19.5V6M3.5 14.5h17v5M6 14.5V10h5a3 3 0 0 1 3 3v1.5M20.5 14.5V11a2 2 0 0 0-2-2h-4" /></svg>
+                </span>
+                <span><strong>Quản lý phòng</strong><small>Xem danh sách và trạng thái phòng</small></span>
+                <span class="quick-card-arrow" aria-hidden="true">›</span>
+            </a>
+            <a asp-controller="Customers" asp-action="Index" class="quick-card quick-card-customers">
+                <span class="quick-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" /><path d="M3.5 19v-1a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v1m1.5-13.5a3 3 0 0 1 0 5.5m1.5 2.5a5 5 0 0 1 3 4.5V19" /></svg>
+                </span>
+                <span><strong>Quản lý khách hàng</strong><small>Xem và cập nhật thông tin khách</small></span>
+                <span class="quick-card-arrow" aria-hidden="true">›</span>
+            </a>
+            <a asp-controller="Bookings" asp-action="Create" class="quick-card quick-card-create">
+                <span class="quick-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="16" rx="2" /><path d="M8 3v4m8-4v4M4 10h16m-8 3v5m-2.5-2.5h5" /></svg>
+                </span>
+                <span><strong>Đặt phòng mới</strong><small>Tạo đặt phòng và kiểm tra lịch trống</small></span>
+                <span class="quick-card-arrow" aria-hidden="true">›</span>
+            </a>
+            <a asp-controller="Bookings" asp-action="Index" class="quick-card quick-card-list">
+                <span class="quick-card-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M8 9h8M8 13h8m-8 4h5" /></svg>
+                </span>
+                <span><strong>Danh sách đặt phòng</strong><small>Theo dõi các lượt lưu trú</small></span>
+                <span class="quick-card-arrow" aria-hidden="true">›</span>
+            </a>
+        </div>
+    </section>
+
+    <div class="dashboard-lower">
+        <section class="data-card recent-bookings" aria-labelledby="recent-bookings-title">
+            <div class="data-card-heading">
+                <div class="dashboard-section-heading">
+                    <h2 id="recent-bookings-title"><span aria-hidden="true">▣</span> Đặt phòng gần đây</h2>
+                </div>
+                <a asp-controller="Bookings" asp-action="Index" class="dashboard-view-all">Xem tất cả <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="table-responsive">
+                <table class="table data-table recent-bookings-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Mã đặt phòng</th>
+                            <th scope="col">Khách hàng</th>
+                            <th scope="col">Số phòng</th>
+                            <th scope="col">Ngày nhận</th>
+                            <th scope="col">Ngày trả</th>
+                            <th scope="col">Tổng tiền</th>
+                            <th scope="col">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var booking in Model.RecentBookings)
+                        {
+                            <tr>
+                                <td class="cell-primary cell-nowrap">#@booking.Id</td>
+                                <td>@booking.CustomerName</td>
+                                <td class="cell-nowrap">@booking.RoomNumber</td>
+                                <td class="cell-nowrap">@booking.CheckIn.ToString("dd/MM/yyyy")</td>
+                                <td class="cell-nowrap">@booking.CheckOut.ToString("dd/MM/yyyy")</td>
+                                <td class="cell-price cell-nowrap">@booking.TotalPrice.ToString("N0") VNĐ</td>
+                                <td>
+                                    @if (booking.Status == "Booked")
+                                    {
+                                        <span class="status-badge status-booked">Đã đặt</span>
+                                    }
+                                    else if (booking.Status == "Cancelled")
+                                    {
+                                        <span class="status-badge status-cancelled">Đã hủy</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-neutral">@booking.Status</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        @if (Model.RecentBookings.Count == 0)
+                        {
+                            <tr><td colspan="7" class="empty-state">Chưa có lượt đặt phòng nào.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="data-card room-status-card" aria-labelledby="room-status-title">
+            <div class="data-card-heading">
+                <div class="dashboard-section-heading">
+                    <h2 id="room-status-title"><span aria-hidden="true">⌂</span> Tình trạng phòng</h2>
+                </div>
+                <a asp-controller="Rooms" asp-action="Index" class="dashboard-view-all">Xem tất cả <span aria-hidden="true">→</span></a>
+            </div>
+            <div class="room-status-content">
+                <div class="room-status-donut"
+                     role="img"
+                     aria-label="Tổng số @Model.TotalRooms phòng: @Model.AvailableRooms phòng trống, @Model.OccupiedRooms đang sử dụng, @Model.UnavailableRooms không khả dụng"
+                     style="--available-angle: @(availableAngle)deg; --occupied-angle: @(occupiedAngle)deg;">
+                    <span><strong>@Model.TotalRooms</strong><small>Tổng phòng</small></span>
+                </div>
+                <ul class="room-status-legend">
+                    <li><span class="legend-label"><i class="legend-dot legend-available"></i>Phòng trống</span><strong>@Model.AvailableRooms</strong></li>
+                    <li><span class="legend-label"><i class="legend-dot legend-occupied"></i>Đang sử dụng</span><strong>@Model.OccupiedRooms</strong></li>
+                    <li><span class="legend-label"><i class="legend-dot legend-unavailable"></i>Không khả dụng</span><strong>@Model.UnavailableRooms</strong></li>
+                </ul>
+            </div>
+            <a asp-controller="Bookings" asp-action="Create" class="room-status-callout">
+                <span class="callout-icon" aria-hidden="true">↗</span>
+                <span><strong>@Model.AvailableRooms phòng trống</strong><small>Sẵn sàng cho khách hàng đặt</small></span>
+                <span class="callout-arrow" aria-hidden="true">→</span>
+            </a>
+        </section>
+    </div>
+</section>

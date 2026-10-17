@@ -1,47 +1,114 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - HotelBooking.Web</title>
+    <title>@ViewData["Title"] - HỆ THỐNG ĐẶT PHÒNG KHÁCH SẠN</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/HotelBooking.Web.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">HotelBooking.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    }
+    <div class="app-frame">
+        <aside class="app-sidebar">
+            <a class="app-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                <span class="app-brand-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <rect x="5" y="3.5" width="14" height="17" rx="2" />
+                        <path d="M9 7.5h.01M15 7.5h.01M9 11.5h.01M15 11.5h.01M9 15.5h.01M15 15.5h.01M11 20.5v-3h2v3" />
+                    </svg>
+                </span>
+                <span class="app-brand-name">HỆ THỐNG<strong>ĐẶT PHÒNG KHÁCH SẠN</strong></span>
+            </a>
+
+            <p class="sidebar-caption">DANH MỤC</p>
+            <nav class="sidebar-nav" aria-label="Điều hướng chính">
+                <a class="sidebar-link @(currentController == "Home" ? "active" : "")"
+                   asp-area="" asp-controller="Home" asp-action="Index"
+                   aria-current="@(currentController == "Home" ? "page" : null)">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <rect x="4" y="4" width="6" height="6" rx="1" />
+                        <rect x="14" y="4" width="6" height="6" rx="1" />
+                        <rect x="4" y="14" width="6" height="6" rx="1" />
+                        <rect x="14" y="14" width="6" height="6" rx="1" />
+                    </svg>
+                    <span>Tổng quan</span>
+                    <span class="sidebar-active-mark" aria-hidden="true"></span>
+                </a>
+                <a class="sidebar-link @(currentController == "Rooms" ? "active" : "")"
+                   asp-area="" asp-controller="Rooms" asp-action="Index"
+                   aria-current="@(currentController == "Rooms" ? "page" : null)">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M3.5 19.5V6M3.5 14.5h17v5M6 14.5V10h5a3 3 0 0 1 3 3v1.5M20.5 14.5V11a2 2 0 0 0-2-2h-4" />
+                    </svg>
+                    <span>Quản lý phòng</span>
+                    <span class="sidebar-active-mark" aria-hidden="true"></span>
+                </a>
+                <a class="sidebar-link @(currentController == "Customers" ? "active" : "")"
+                   asp-area="" asp-controller="Customers" asp-action="Index"
+                   aria-current="@(currentController == "Customers" ? "page" : null)">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="9" cy="8" r="3" />
+                        <path d="M3.5 19v-1a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v1M16 5.5a3 3 0 0 1 0 5.5m1.5 2.5a5 5 0 0 1 3 4.5V19" />
+                    </svg>
+                    <span>Quản lý khách hàng</span>
+                    <span class="sidebar-active-mark" aria-hidden="true"></span>
+                </a>
+                <a class="sidebar-link @(currentController == "Bookings" ? "active" : "")"
+                   asp-area="" asp-controller="Bookings" asp-action="Index"
+                   aria-current="@(currentController == "Bookings" ? "page" : null)">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <rect x="4" y="5.5" width="16" height="15" rx="2" />
+                        <path d="M8 3.5v4M16 3.5v4M4 10h16m-11 4 2 2 4-4" />
+                    </svg>
+                    <span>Quản lý đặt phòng</span>
+                    <span class="sidebar-active-mark" aria-hidden="true"></span>
+                </a>
+            </nav>
+
+            <div class="sidebar-lounge" aria-hidden="true">
+                <span>Trải nghiệm lưu trú</span>
+                <strong>trọn vẹn hơn</strong>
+                <i></i>
+            </div>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-bottom-mark" aria-hidden="true">H</div>
+                <div>
+                    <strong>HỆ THỐNG ĐẶT PHÒNG KHÁCH SẠN</strong>
+                    <span>Quản lý lưu trú</span>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        </aside>
+
+        <div class="app-content">
+            <header class="app-topbar">
+                <span class="topbar-emblem" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 3.5 19 6v5.1c0 4.1-2.8 7.5-7 9.4-4.2-1.9-7-5.3-7-9.4V6l7-2.5Z" />
+                        <path d="m9 11.8 2 2 4-4" />
+                    </svg>
+                </span>
+                <span class="topbar-copy">
+                    <strong>Chào mừng bạn đến với hệ thống</strong>
+                    <small>Quản lý phòng, khách hàng và đặt phòng thuận tiện.</small>
+                </span>
+                <span class="topbar-system-name">HỆ THỐNG ĐẶT PHÒNG KHÁCH SẠN</span>
+            </header>
+            <main role="main" class="app-main">
+                @RenderBody()
+            </main>
+            <footer class="app-footer">
+                <span>&copy; 2026 HỆ THỐNG ĐẶT PHÒNG KHÁCH SẠN</span>
+                <a asp-area="" asp-controller="Home" asp-action="Privacy">Chính sách bảo mật</a>
+            </footer>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - HotelBooking.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
