@@ -1,38 +1,56 @@
-# Hotel Booking Deployment
+# HỆ THỐNG ĐẶT PHÒNG KHÁCH SẠN
 
-Đề 6 - Hệ thống Đặt phòng Khách sạn, môn Triển khai và Quản trị Hệ thống Phần mềm.
+Học phần: Triển khai và Quản trị Hệ thống Phần mềm
 
-## Kiến trúc
+Đề tài số 6: Hệ thống đặt phòng khách sạn
 
-Ứng dụng ASP.NET Core MVC .NET 9 sử dụng PostgreSQL 17. Docker Compose triển khai website, pgAdmin, Nginx reverse proxy, Prometheus, Grafana, Loki và Promtail.
+## 1. Giới thiệu đề tài
 
-| Thành phần | Vai trò | Cổng truy cập trên máy host |
-| --- | --- | --- |
-| Nginx | Reverse proxy đến website; security headers | http://localhost:8086 |
-| Website | Ứng dụng đặt phòng khách sạn | http://localhost:8085 |
-| pgAdmin | Quản trị PostgreSQL | http://localhost:5050 |
-| Prometheus | Thu thập metrics mỗi 15 giây | http://localhost:9095 |
-| Grafana | Dashboard metrics và Explore/LogQL | http://localhost:3006 |
-| PostgreSQL | Database `hotelbooking` | Không publish ra host |
-| Loki | Lưu log tập trung, chỉ truy cập trong monitoring network | Không publish ra host |
-| Promtail | Khám phá và gửi Docker logs của project đến Loki | Không publish ra host |
+Trong bài thực hành này, em xây dựng và triển khai hệ thống đặt phòng khách sạn bằng ASP.NET Core MVC trên .NET 9 và PostgreSQL 17.
 
-Prometheus scrape Prometheus, cAdvisor, postgres-exporter và Blackbox Exporter (kiểm tra website qua Nginx). Grafana provision sẵn datasource Prometheus và Loki cùng dashboard **Hotel Booking Monitoring**. Dashboard JSON được lưu tại `monitoring/grafana/dashboards/`.
+Hệ thống hỗ trợ quản lý thông tin phòng, khách hàng và đặt phòng. Ngoài các chức năng của website, em sử dụng Docker Compose để triển khai các dịch vụ, Nginx làm reverse proxy, Prometheus và Grafana để giám sát hoạt động, Loki và Promtail để thu thập và tra cứu log.
 
-Compose chia các container thành `database_network` và `monitoring_network`. Nginx nối vào cả hai để chuyển tiếp đến website và cho Blackbox Exporter kiểm tra qua Nginx. PostgreSQL không có cổng host; Loki cũng không publish cổng ra host.
+Mục tiêu của bài là triển khai được một hệ thống web có cơ sở dữ liệu, có thể theo dõi tình trạng hoạt động và áp dụng một số biện pháp bảo mật cơ bản.
 
-## Chuẩn bị
+## 2. Công nghệ sử dụng
 
-Yêu cầu Docker Desktop với Docker Compose v2. Tại thư mục dự án, tạo `.env` nếu chưa có và điền mật khẩu mạnh, riêng biệt:
+| Công nghệ | Mục đích |
+|---|---|
+| ASP.NET Core MVC (.NET 9) | Xây dựng website |
+| PostgreSQL 17 | Lưu trữ dữ liệu |
+| pgAdmin | Quản lý cơ sở dữ liệu |
+| Docker Compose | Chạy và quản lý các dịch vụ |
+| Nginx | Reverse proxy |
+| Prometheus | Thu thập dữ liệu giám sát |
+| Grafana | Hiển thị biểu đồ và dashboard |
+| Loki | Lưu trữ log |
+| Promtail | Thu thập log container |
+
+## 3. Các chức năng của hệ thống
+
+Website có các chức năng chính:
+
+- Quản lý thông tin phòng khách sạn.
+- Quản lý thông tin khách hàng.
+- Tạo và xem danh sách đặt phòng.
+- Kiểm tra thời gian đặt phòng để hạn chế đặt trùng lịch.
+
+Các chức năng được kết nối với cơ sở dữ liệu PostgreSQL.
+
+## 4. Hướng dẫn chạy chương trình
+
+Bước 1: Cài đặt Docker Desktop và mở thư mục dự án bằng VS Code.
+
+Bước 2: Tạo file `.env` từ `.env.example` nếu chưa có:
 
 ```powershell
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 notepad .env
 ```
 
-Đặt các giá trị `POSTGRES_PASSWORD`, `PGADMIN_PASSWORD` và `GRAFANA_PASSWORD`; `PGADMIN_EMAIL` là tài khoản đăng nhập pgAdmin. Dùng mật khẩu ngẫu nhiên dài do password manager tạo. Không dùng các giá trị `CHANGE_ME_*` để triển khai và không commit `.env`. File này nằm trong `.gitignore`; `.env.example` chỉ chứa placeholder.
+Thay các giá trị `CHANGE_ME_*` bằng mật khẩu riêng cho PostgreSQL, pgAdmin và Grafana; điền email dùng để đăng nhập pgAdmin. Không đưa file `.env` lên GitHub. File này đã được thêm vào `.gitignore`.
 
-## Khởi động và kiểm tra
+Bước 3: Kiểm tra và chạy hệ thống:
 
 ```powershell
 docker compose config --quiet
@@ -40,61 +58,102 @@ docker compose up -d --build
 docker compose ps
 ```
 
-`docker compose up` không xóa named volumes. PostgreSQL lưu dữ liệu trong `postgres_data`; Grafana, Prometheus, Loki và Promtail cũng có volumes riêng để giữ dữ liệu hoặc vị trí đọc log. Để dừng mà vẫn giữ dữ liệu, dùng `docker compose stop`; để chạy lại, dùng `docker compose up -d`. **Không chạy `docker compose down -v`**, vì tùy chọn `-v` xóa volumes.
+Bước 4: Truy cập các dịch vụ:
 
-Kiểm tra Prometheus targets tại **Status → Targets** hoặc chạy:
+| Dịch vụ | Địa chỉ |
+|---|---|
+| Website | http://localhost:8085 |
+| Website qua Nginx | http://localhost:8086 |
+| pgAdmin | http://localhost:5050 |
+| Prometheus | http://localhost:9095 |
+| Grafana | http://localhost:3006 |
+
+PostgreSQL và Loki được sử dụng trong mạng Docker, không cần mở cổng trực tiếp ra máy tính.
+
+Để tạm dừng hệ thống:
 
 ```powershell
-Invoke-RestMethod http://localhost:9095/api/v1/targets
+docker compose stop
 ```
 
-Các job mong đợi: `prometheus`, `cadvisor`, `postgres`, `hotel-website`.
+Để chạy lại:
 
-## Grafana và dashboard
+```powershell
+docker compose up -d
+```
 
-Đăng nhập Grafana tại http://localhost:3006 bằng user `admin` và mật khẩu `GRAFANA_PASSWORD` trong `.env`. Dashboard **Hotel Booking Monitoring** có các panel trạng thái website/PostgreSQL, kết nối và dung lượng database, CPU/RAM container, và transaction commit PostgreSQL.
+**Lưu ý:** Không sử dụng `docker compose down -v` vì có thể làm mất dữ liệu lưu trong Docker volumes.
 
-Datasource được provision từ:
+## 5. Giám sát hệ thống bằng Prometheus và Grafana
 
-- `monitoring/grafana/provisioning/datasources/datasources.yml`
-- `monitoring/grafana/provisioning/dashboards/provider.yml`
+Em sử dụng Prometheus để thu thập thông tin hoạt động của website, container và PostgreSQL.
 
-Dashboard JSON nằm trong `monitoring/grafana/dashboards/hotel-booking-monitoring.json`. Loki và Prometheus được truy cập nội bộ bằng tên service Compose.
+Các thành phần giám sát gồm:
 
-## Loki, Promtail và LogQL
+- `prometheus`: Giám sát Prometheus.
+- `cadvisor`: Theo dõi tài nguyên container.
+- `postgres`: Theo dõi PostgreSQL.
+- `hotel-website`: Kiểm tra website có hoạt động hay không.
 
-Promtail dùng Docker service discovery và chỉ giữ các container có label Compose project `hotel-booking-deployment`. Các log được gắn nhãn `service`, `container` và `stream`, sau đó gửi đến Loki. Mở Grafana **Explore**, chọn datasource **Loki** và chạy các truy vấn sau:
+Có thể kiểm tra tại:
+
+http://localhost:9095/targets
+
+Khi các dịch vụ hoạt động bình thường, trạng thái hiển thị là `UP`.
+
+Grafana được sử dụng để hiển thị các thông tin giám sát thông qua dashboard **Hotel Booking Monitoring**, gồm trạng thái website, thông tin PostgreSQL và tài nguyên container.
+
+## 6. Thu thập và tra cứu log
+
+Em sử dụng Promtail để thu thập log từ các container và gửi về Loki.
+
+Để xem log, truy cập Grafana, chọn Explore, sau đó chọn nguồn dữ liệu Loki.
+
+Một số câu truy vấn LogQL:
+
+**Truy vấn 1: Xem log website**
 
 ```logql
 {service="web"}
 ```
 
-Xem log truy cập Nginx:
+**Truy vấn 2: Xem các yêu cầu GET của Nginx**
 
 ```logql
 {service="nginx"} |= "GET"
 ```
 
-Đếm số log theo service trong 5 phút gần nhất:
+**Truy vấn 3: Thống kê số dòng log trong 5 phút**
 
 ```logql
 sum by (service) (count_over_time({service=~"nginx|web|postgres"}[5m]))
 ```
 
-Loki giữ log tối đa 7 ngày; Prometheus giữ metrics 3 ngày. Dữ liệu được lưu cục bộ trong named volumes, không gửi đến dịch vụ cloud.
+Các truy vấn giúp kiểm tra hoạt động của hệ thống và hỗ trợ tìm lỗi khi cần thiết.
 
-## Hardening và giới hạn
+## 7. Các biện pháp bảo mật
 
-- Website chạy non-root (UID 1654). Loki chạy non-root (UID 10001), filesystem chỉ đọc, bỏ Linux capabilities và bật `no-new-privileges`. Web, Prometheus, Grafana, postgres-exporter và Blackbox Exporter cũng bỏ capabilities và bật `no-new-privileges`.
-- cAdvisor cần đọc một số đường dẫn host để thu thập chỉ số; các bind mount host được đặt read-only và cAdvisor chỉ tham gia monitoring network.
-- Nginx thêm `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` và tắt `server_tokens`. Phần triển khai hiện dùng HTTP nội bộ/localhost, chưa cấu hình HTTPS.
-- Cổng web, Nginx, pgAdmin, Prometheus và Grafana chỉ bind vào `127.0.0.1`. PostgreSQL và Loki không mở cổng host.
-- Mật khẩu chỉ lấy từ `.env`; Compose yêu cầu các biến cần thiết và không cung cấp mật khẩu mặc định dùng được.
-- Promtail hiện chạy UID 0 để đọc Docker logs và gọi Docker service discovery. Socket được mount `:ro`, nhưng **read-only mount không giới hạn các API mà client có thể gọi trên Docker daemon**; quyền truy cập socket vẫn rất nhạy cảm và có thể tương đương quyền quản trị host nếu Promtail bị xâm nhập. Cấu hình lọc log theo project, bỏ capabilities, filesystem chỉ đọc và không publish cổng Promtail, nhưng không loại bỏ rủi ro từ socket. Chỉ dùng trên máy tin cậy.
-- Đề thi yêu cầu Promtail. Theo tài liệu Grafana, Promtail đã hết vòng đời hỗ trợ từ ngày 2-3-2026; giữ cấu hình này để đáp ứng yêu cầu học phần. Với triển khai mới cần được duy trì, hãy đánh giá chuyển sang Grafana Alloy.
+Trong quá trình triển khai, em áp dụng một số biện pháp bảo mật cơ bản:
 
-Không thay đổi chức năng website, schema PostgreSQL hoặc dữ liệu đặt phòng khi bổ sung monitoring. Không xóa volumes để xử lý lỗi triển khai.
+- Sử dụng file `.env` để lưu mật khẩu, không đưa mật khẩu lên GitHub.
+- Giới hạn các cổng truy cập từ máy tính bằng địa chỉ `127.0.0.1`.
+- Không mở trực tiếp cổng PostgreSQL ra ngoài.
+- Cấu hình Nginx với các HTTP security headers.
+- Website chạy bằng user không phải root. Một số dịch vụ monitoring được bỏ Linux capabilities và bật `no-new-privileges`.
+- Sử dụng Docker network để quản lý kết nối giữa các dịch vụ.
 
-## Báo cáo học phần
+Hiện tại, Nginx sử dụng HTTP kết hợp với security headers cơ bản, chưa triển khai HTTPS.
 
-README này hướng dẫn triển khai, nhưng không thay thế báo cáo tổng hợp tối thiểu 10 trang theo đề thi. Báo cáo cần thông tin sinh viên trên bìa và ảnh minh họa kết quả chạy website, pgAdmin, Grafana, LogQL và hardening.
+Promtail và cAdvisor cần quyền đọc một số thông tin từ Docker và máy chủ để thu thập log, dữ liệu giám sát. Các quyền này được giới hạn phù hợp với môi trường thực hành.
+
+## 8. Quản lý mã nguồn bằng GitHub
+
+Mã nguồn và các file cấu hình được quản lý trên GitHub:
+
+https://github.com/DTC245200126/hotel-booking-deployment
+
+Quá trình thực hiện được chia thành các phần:
+
+- Commit 1: Triển khai website, PostgreSQL, pgAdmin và Nginx.
+- Commit 2: Tích hợp Prometheus và Grafana.
+- Commit 3: Tích hợp Loki, Promtail và các truy vấn LogQL.
