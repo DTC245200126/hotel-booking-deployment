@@ -37,6 +37,10 @@ services:
       context: ./src/HotelBooking.Web
       dockerfile: Dockerfile
     restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: 8080
@@ -72,6 +76,10 @@ services:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
       - "--storage.tsdb.retention.time=3d"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "127.0.0.1:9095:9090"
     volumes:
@@ -84,6 +92,49 @@ services:
       - postgres-exporter
       - blackbox-exporter
 
+  # LOKI LOG STORAGE
+  loki:
+    image: grafana/loki:3.5.0
+    restart: unless-stopped
+    command:
+      - "-config.file=/etc/loki/loki-config.yml"
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitoring_network
+
+  # PROMTAIL LOG COLLECTOR
+  promtail:
+    image: grafana/promtail:3.5.0
+    restart: unless-stopped
+    command:
+      - "-config.file=/etc/promtail/promtail-config.yml"
+    volumes:
+      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - promtail_data:/var/lib/promtail
+    user: "0:0"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitoring_network
+    depends_on:
+      - loki
+
   # GRAFANA
   grafana:
     image: grafana/grafana:12.1.1
@@ -95,10 +146,18 @@ services:
       - "127.0.0.1:3006:3000"
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/datasources/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./monitoring/grafana/provisioning/dashboards/provider.yml:/etc/grafana/provisioning/dashboards/provider.yml:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioned-dashboards:ro
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     networks:
       - monitoring_network
     depends_on:
       - prometheus
+      - loki
 
   # MONITOR DOCKER CONTAINERS
   cadvisor:
@@ -116,6 +175,10 @@ services:
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:v0.17.1
     restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     environment:
       DATA_SOURCE_NAME: "postgresql://hoteladmin:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/hotelbooking?sslmode=disable"
     networks:
@@ -129,6 +192,10 @@ services:
   blackbox-exporter:
     image: prom/blackbox-exporter:v0.27.0
     restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     networks:
       - monitoring_network
 
@@ -137,6 +204,8 @@ volumes:
   pgadmin_data:
   prometheus_data:
   grafana_data:
+  loki_data:
+  promtail_data:
 
 networks:
   database_network:
