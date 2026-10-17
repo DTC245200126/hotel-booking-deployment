@@ -44,7 +44,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: 8080
-      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=hotelbooking;Username=hoteladmin;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=hotelbooking;Username=hotelapp;Password=${HOTELAPP_PASSWORD:?Set HOTELAPP_PASSWORD}"
     ports:
       - "127.0.0.1:8085:8080"
     networks:
