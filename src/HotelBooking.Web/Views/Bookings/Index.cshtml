@@ -66,6 +66,10 @@
                                 {
                                     <span class="status-badge status-cancelled">Đã hủy</span>
                                 }
+                                else if (booking.Status == "CheckedOut")
+                                {
+                                    <span class="status-badge status-neutral">Đã trả phòng</span>
+                                }
                                 else
                                 {
                                     <span class="status-badge status-neutral">@booking.Status</span>

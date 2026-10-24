@@ -30,7 +30,7 @@ public class BookingsController : Controller
     }
 
     // Danh sách phòng
-    private async Task LoadRooms()
+    private async Task LoadRooms(int? selectedRoomId = null)
     {
         var rooms = await _context.Rooms
             .Where(r => r.Status == "Available")
@@ -44,18 +44,20 @@ public class BookingsController : Controller
                 Display = $"Phòng {r.RoomNumber} - {r.RoomType} - {r.Price:N0} VNĐ/đêm"
             }),
             "Id",
-            "Display"
+            "Display",
+            selectedRoomId
         );
     }
 
     // Hiển thị form đặt phòng
     [HttpGet]
-    public async Task<IActionResult> Create()
+    public async Task<IActionResult> Create(int? roomId)
     {
-        await LoadRooms();
+        await LoadRooms(roomId);
 
         return View(new Booking
         {
+            RoomId = roomId ?? 0,
             CheckIn = DateTime.Today,
             CheckOut = DateTime.Today.AddDays(1)
         });
@@ -150,7 +152,7 @@ public class BookingsController : Controller
 
         if (!ModelState.IsValid)
         {
-            await LoadRooms();
+            await LoadRooms(booking.RoomId);
             return View(booking);
         }
 

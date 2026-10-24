@@ -2,100 +2,271 @@
 
 @{
     ViewData["Title"] = "Quản lý phòng";
+    var rooms = Model.ToList();
+    var today = DateTime.UtcNow.Date;
+
+    string GetDisplayStatus(HotelBooking.Web.Models.Room room)
+    {
+        if (room.Status == "Maintenance")
+            return "Maintenance";
+
+        if (room.Bookings.Any(booking =>
+                booking.CheckIn.Date <= today &&
+                booking.CheckOut.Date > today))
+        {
+            return "Occupied";
+        }
+
+        if (room.Bookings.Any(booking => booking.CheckIn.Date > today))
+            return "Booked";
+
+        if (room.Status == "Occupied")
+            return "Occupied";
+
+        return room.Status;
+    }
+
+    var availableRooms = rooms.Count(room => GetDisplayStatus(room) == "Available");
+    var occupiedRooms = rooms.Count(room => GetDisplayStatus(room) == "Occupied");
+    var reservedRooms = rooms.Count(room => GetDisplayStatus(room) == "Booked");
+    var maintenanceRooms = rooms.Count(room => GetDisplayStatus(room) == "Maintenance");
 }
 
-<section class="management-page">
-    <header class="page-heading">
-        <div>
-            <p class="page-eyebrow">DANH MỤC</p>
+<section class="management-page rooms-management">
+    <header class="rooms-hero">
+        <div class="rooms-hero-copy">
+            <p class="rooms-hero-eyebrow">
+                <span aria-hidden="true"></span>
+                KHÔNG GIAN LƯU TRÚ
+            </p>
             <h1>Quản lý phòng</h1>
-            <p class="page-description">Danh sách và trạng thái các phòng trong khách sạn.</p>
+            <p>Theo dõi tình trạng phòng và cập nhật thông tin lưu trú của khách sạn.</p>
         </div>
-        <a asp-controller="Rooms" asp-action="Create" class="btn btn-primary action-button">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-            Thêm phòng
-        </a>
+        <div class="rooms-hero-action">
+            <span>@rooms.Count phòng trong hệ thống</span>
+            <a asp-controller="Rooms" asp-action="Create" class="btn btn-primary action-button">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                Thêm phòng mới
+            </a>
+        </div>
     </header>
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success" role="status">@TempData["Success"]</div>
+        <div class="alert alert-success rooms-alert" role="status">@TempData["Success"]</div>
+    }
+
+    @if (TempData["CheckoutSuccess"] is string checkedOutRoom)
+    {
+        <div class="checkout-notice" role="status" aria-live="polite">
+            <span class="checkout-notice-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+            </span>
+            <span>
+                <strong>Trả phòng thành công</strong>
+                <span>Phòng @checkedOutRoom đã sẵn sàng cho khách tiếp theo.</span>
+            </span>
+        </div>
     }
 
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger" role="alert">@TempData["Error"]</div>
+        <div class="alert alert-danger rooms-alert" role="alert">@TempData["Error"]</div>
     }
 
-    <div class="data-card">
-        <div class="data-card-heading">
+    <div class="room-summary" aria-label="Thống kê trạng thái phòng">
+        <article class="room-summary-card">
+            <span class="room-summary-icon summary-icon-total" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 19.5V6M3.5 14.5h17v5M3.5 10h4a4 4 0 0 1 4 4v.5M20.5 14.5V11a2 2 0 0 0-2-2h-4" /></svg>
+            </span>
+            <span class="room-summary-copy">
+                <span>Tổng số phòng</span>
+                <strong>@rooms.Count</strong>
+            </span>
+            <span class="room-summary-caption">Tất cả hạng phòng</span>
+        </article>
+        <article class="room-summary-card">
+            <span class="room-summary-icon summary-icon-available" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+            </span>
+            <span class="room-summary-copy">
+                <span>Phòng trống</span>
+                <strong>@availableRooms</strong>
+            </span>
+            <span class="room-summary-caption">Sẵn sàng đón khách</span>
+        </article>
+        <article class="room-summary-card">
+            <span class="room-summary-icon summary-icon-occupied" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3" /><path d="M5 20v-1a7 7 0 0 1 14 0v1" /></svg>
+            </span>
+            <span class="room-summary-copy">
+                <span>Đang sử dụng</span>
+                <strong>@occupiedRooms</strong>
+            </span>
+            <span class="room-summary-caption">Có khách đang lưu trú</span>
+        </article>
+        <article class="room-summary-card">
+            <span class="room-summary-icon summary-icon-booked" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5.5" width="16" height="15" rx="2" /><path d="M8 3.5v4M16 3.5v4M4 10h16m-11 4 2 2 4-4" /></svg>
+            </span>
+            <span class="room-summary-copy">
+                <span>Đã đặt trước</span>
+                <strong>@reservedRooms</strong>
+            </span>
+            <span class="room-summary-caption">Có lịch nhận phòng sắp tới</span>
+        </article>
+        <article class="room-summary-card">
+            <span class="room-summary-icon summary-icon-maintenance" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="m14 6 4 4M4 20l5.5-1.2L20 8.3 15.7 4 5.2 14.5 4 20ZM12 7.5l4.5 4.5" /></svg>
+            </span>
+            <span class="room-summary-copy">
+                <span>Bảo trì</span>
+                <strong>@maintenanceRooms</strong>
+            </span>
+            <span class="room-summary-caption">Chưa sẵn sàng phục vụ</span>
+        </article>
+    </div>
+
+    <section class="rooms-catalog" aria-labelledby="rooms-catalog-heading">
+        <header class="rooms-catalog-heading">
             <div>
-                <h2>Danh sách phòng</h2>
-                <p>Thông tin loại phòng, giá và tình trạng hiện tại.</p>
+                <h2 id="rooms-catalog-heading">Danh sách phòng</h2>
+                <p>Không gian nghỉ dưỡng và tình trạng phục vụ hiện tại.</p>
             </div>
-            <span class="record-count">@Model.Count() phòng</span>
-        </div>
-        <div class="table-responsive">
-            <table class="table data-table room-table">
-                <thead>
-                    <tr>
-                        <th scope="col">Số phòng</th>
-                        <th scope="col">Loại phòng</th>
-                        <th scope="col">Giá / đêm</th>
-                        <th scope="col">Trạng thái</th>
-                        <th scope="col">Mô tả</th>
-                        <th scope="col" class="text-end">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var room in Model)
-                    {
-                        <tr>
-                            <td class="cell-primary">@room.RoomNumber</td>
-                            <td>@room.RoomType</td>
-                            <td class="cell-price">@room.Price.ToString("N0") VNĐ</td>
-                            <td>
-                                @if (room.Status == "Available")
-                                {
-                                    <span class="status-badge status-available">Phòng trống</span>
-                                }
-                                else if (room.Status == "Occupied")
-                                {
-                                    <span class="status-badge status-occupied">Đang sử dụng</span>
-                                }
-                                else if (room.Status == "Maintenance")
-                                {
-                                    <span class="status-badge status-maintenance">Bảo trì</span>
-                                }
-                                else
-                                {
-                                    <span class="status-badge status-neutral">@room.Status</span>
-                                }
-                            </td>
-                            <td class="description-cell">@(string.IsNullOrWhiteSpace(room.Description) ? "—" : room.Description)</td>
-                            <td>
-                                <div class="row-actions">
-                                    <a asp-action="Edit" asp-route-id="@room.Id" class="icon-button edit-button" aria-label="Sửa phòng @room.RoomNumber" title="Sửa">
+            <span class="record-count">@rooms.Count phòng</span>
+        </header>
+
+        @if (rooms.Count == 0)
+        {
+            <div class="rooms-empty-state">
+                <span class="rooms-empty-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 19.5V6M3.5 14.5h17v5M3.5 10h4a4 4 0 0 1 4 4v.5M20.5 14.5V11a2 2 0 0 0-2-2h-4" /></svg>
+                </span>
+                <strong>Chưa có phòng nào</strong>
+                <span>Thêm phòng đầu tiên để bắt đầu quản lý danh mục lưu trú.</span>
+                <a asp-controller="Rooms" asp-action="Create" class="btn btn-primary action-button">Thêm phòng mới</a>
+            </div>
+        }
+        else
+        {
+            <div class="room-card-grid">
+                @foreach (var room in rooms)
+                {
+                    var displayStatus = GetDisplayStatus(room);
+                    var latestBooking = room.Bookings
+                        .OrderBy(booking => booking.CheckIn.Date <= today &&
+                            booking.CheckOut.Date > today ? 0 : 1)
+                        .ThenByDescending(booking => booking.CheckIn)
+                        .FirstOrDefault();
+                    var roomImageNumber = ((room.Id - 1) % 9) + 1;
+                    var roomImagePath = Url.Content($"~/images/rooms/room-{roomImageNumber:00}.jpg");
+                    var floor = int.TryParse(room.RoomNumber, out var roomNumber)
+                        ? roomNumber / 100
+                        : (int?)null;
+
+                    <article class="room-card">
+                        <div class="room-card-cover room-cover-@room.RoomType.ToLowerInvariant()">
+                            <img src="@roomImagePath"
+                                 alt="Ảnh nội thất phòng @room.RoomNumber"
+                                 loading="lazy" />
+                            <span class="room-card-cover-label">HOTEL BOOKING</span>
+                            @if (displayStatus == "Occupied")
+                            {
+                                <span class="room-card-status room-card-status-occupied">Đang sử dụng</span>
+                            }
+                            else if (displayStatus == "Booked")
+                            {
+                                <span class="room-card-status room-card-status-booked">Đã đặt trước</span>
+                            }
+                            else if (displayStatus == "Maintenance")
+                            {
+                                <span class="room-card-status room-card-status-maintenance">Bảo trì</span>
+                            }
+                            else
+                            {
+                                <span class="room-card-status room-card-status-available">Phòng trống</span>
+                            }
+                        </div>
+
+                        <div class="room-card-body">
+                            <div class="room-card-title">
+                                <div>
+                                    <span class="room-card-kicker">PHÒNG</span>
+                                    <h3>@room.RoomNumber</h3>
+                                </div>
+                                <span class="room-floor">@(floor.HasValue ? $"Tầng {floor.Value}" : "Khách sạn")</span>
+                            </div>
+
+                            <p class="room-card-type">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 4 8 8-8 8-8-8 8-8Z" /></svg>
+                                Phòng @room.RoomType
+                            </p>
+
+                            <div class="room-card-dates">
+                                <div>
+                                    <span>Ngày nhận</span>
+                                    <strong>@(latestBooking == null ? "--" : latestBooking.CheckIn.ToString("dd/MM/yyyy"))</strong>
+                                </div>
+                                <div>
+                                    <span>Ngày trả</span>
+                                    <strong>@(latestBooking == null ? "--" : latestBooking.CheckOut.ToString("dd/MM/yyyy"))</strong>
+                                </div>
+                            </div>
+
+                            <div class="room-card-description">
+                                <span>Mô tả phòng</span>
+                                <strong>@(string.IsNullOrWhiteSpace(room.Description) ? "Chưa có mô tả" : room.Description)</strong>
+                            </div>
+
+                            <div class="room-card-footer">
+                                <span class="room-card-price">@room.Price.ToString("N0") <small>VNĐ / đêm</small></span>
+                                <div class="room-card-actions">
+                                    @if (displayStatus == "Occupied")
+                                    {
+                                        <form asp-action="CheckOut"
+                                              asp-route-id="@room.Id"
+                                              method="post"
+                                              class="room-card-checkout-form"
+                                              onsubmit="return confirm('Xác nhận trả phòng @room.RoomNumber?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="room-card-checkout">
+                                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h5v5M19 4l-8 8m-1-7H5a2 2 0 0 0-2 2v12h16v-5" /></svg>
+                                                Trả phòng
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (displayStatus == "Available")
+                                    {
+                                        <a asp-controller="Bookings" asp-action="Create" asp-route-roomId="@room.Id" class="room-card-rent">
+                                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7.5" /></svg>
+                                            Cho thuê
+                                        </a>
+                                    }
+                                    else if (displayStatus == "Booked")
+                                    {
+                                        <span class="room-card-unavailable">Đã đặt trước</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="room-card-unavailable">Không khả dụng</span>
+                                    }
+                                    <a asp-action="Edit" asp-route-id="@room.Id" class="room-card-edit" aria-label="Cập nhật phòng @room.RoomNumber">
                                         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14 5 5 5M4 20l4.5-1 10.8-10.8a2.1 2.1 0 0 0-3-3L5.5 16 4 20Z" /></svg>
+                                        Cập nhật
                                     </a>
-                                    <form asp-action="Delete" asp-route-id="@room.Id" method="post" class="inline-form" onsubmit="return confirm('Bạn có chắc muốn xóa phòng này?');">
+                                    <form asp-action="Delete" asp-route-id="@room.Id" method="post" class="room-card-delete-form" onsubmit="return confirm('Bạn có chắc muốn xóa phòng này?');">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="icon-button delete-button" aria-label="Xóa phòng @room.RoomNumber" title="Xóa">
+                                        <button type="submit" class="room-card-delete">
                                             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" /></svg>
+                                            Xóa phòng
                                         </button>
                                     </form>
                                 </div>
-                            </td>
-                        </tr>
-                    }
-                    @if (!Model.Any())
-                    {
-                        <tr>
-                            <td colspan="6" class="empty-state">Chưa có phòng nào. Hãy thêm phòng mới.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
 </section>

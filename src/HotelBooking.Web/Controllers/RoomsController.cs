@@ -17,7 +17,11 @@ public class RoomsController : Controller
     // Hiển thị danh sách phòng
     public async Task<IActionResult> Index()
     {
+        var today = DateTime.UtcNow.Date;
         var rooms = await _context.Rooms
+            .Include(room => room.Bookings.Where(booking =>
+                booking.Status == "Booked" &&
+                booking.CheckOut > today))
             .AsNoTracking()
             .OrderBy(r => r.RoomNumber)
             .ToListAsync();
@@ -104,6 +108,48 @@ public class RoomsController : Controller
         await _context.SaveChangesAsync();
 
         TempData["Success"] = "Cập nhật phòng thành công!";
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CheckOut(int id)
+    {
+        var room = await _context.Rooms
+            .Include(r => r.Bookings.Where(booking =>
+                booking.Status == "Booked"))
+            .FirstOrDefaultAsync(r => r.Id == id);
+
+        if (room == null)
+            return NotFound();
+
+        var today = DateTime.UtcNow.Date;
+        var activeBooking = room.Bookings
+            .Where(booking =>
+                booking.CheckIn.Date <= today &&
+                booking.CheckOut.Date > today)
+            .OrderByDescending(booking => booking.CheckIn)
+            .FirstOrDefault();
+
+        if (activeBooking == null && room.Status != "Occupied")
+        {
+            TempData["Error"] = "Phòng hiện không có lượt thuê cần trả phòng.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        await using var transaction =
+            await _context.Database.BeginTransactionAsync();
+
+        if (activeBooking != null)
+            activeBooking.Status = "CheckedOut";
+
+        if (room.Status != "Maintenance")
+            room.Status = "Available";
+
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        TempData["CheckoutSuccess"] = room.RoomNumber;
         return RedirectToAction(nameof(Index));
     }
 
