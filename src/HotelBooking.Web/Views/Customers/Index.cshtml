@@ -53,14 +53,10 @@
                             <td>@(string.IsNullOrWhiteSpace(customer.Email) ? "Chưa cập nhật" : customer.Email)</td>
                             <td>
                                 <div class="row-actions">
-                                    <a asp-controller="Customers" asp-action="Edit" asp-route-id="@customer.Id" class="icon-button edit-button" aria-label="Sửa khách hàng @customer.FullName" title="Sửa">
-                                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14 5 5 5M4 20l4.5-1 10.8-10.8a2.1 2.1 0 0 0-3-3L5.5 16 4 20Z" /></svg>
-                                    </a>
+                                    <a asp-controller="Customers" asp-action="Edit" asp-route-id="@customer.Id" class="row-action-button edit-button" aria-label="Sửa khách hàng @customer.FullName">Sửa</a>
                                     <form asp-controller="Customers" asp-action="Delete" asp-route-id="@customer.Id" method="post" class="inline-form" onsubmit="return confirm('Bạn có chắc muốn xóa khách hàng này?');">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="icon-button delete-button" aria-label="Xóa khách hàng @customer.FullName" title="Xóa">
-                                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3" /></svg>
-                                        </button>
+                                        <button type="submit" class="row-action-button delete-button" aria-label="Xóa khách hàng @customer.FullName">Xóa</button>
                                     </form>
                                 </div>
                             </td>
